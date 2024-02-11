@@ -70,3 +70,4 @@ kubectl apply -f ./manifests/busybox-pod.yaml
 * https://koras02.tistory.com/236
 * https://dev.to/ashokan/simple-validation-webhook-with-python-5bof
 * https://github.com/slackhq/simple-kubernetes-webhook/blob/main/pkg/admission/admission.go#L83
+* https://sphong0417.tistory.com/54
