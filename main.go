@@ -8,8 +8,13 @@ import (
 type requestAndResponse map[string]string
 
 func (m requestAndResponse) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	for k, v := range m {
-		fmt.Fprintf(w, "%s: %s\n", k, v)
+	switch r.URL.Path {
+	case "/":
+		fmt.Fprintf(w, "Hello, world!")
+	case "/sample":
+		for k, v := range m {
+			fmt.Fprintf(w, "%s: %s\n", k, v)
+		}
 	}
 }
 
