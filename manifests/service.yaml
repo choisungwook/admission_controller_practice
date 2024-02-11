@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: admission-server
+  labels:
+    app: admission-controller-debug-deployment
+spec:
+  selector:
+    app: admission-controller-debug-deployment
+  ports:
+  - port: 443
+    targetPort: 443
