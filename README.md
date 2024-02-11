@@ -39,6 +39,7 @@ kubectl exec -it {pod 이름} -- /bin/bash
 go mod init github.com/opsarena/admission-controller
 go get k8s.io/api/admission/v1
 go get k8s.io/apimachinery/pkg/apis/meta/v1
+go get k8s.io/api/core/v1
 ```
 
 * main.go 파일 생성: [main.go](./src/main.go)파일을 pod안에 복사

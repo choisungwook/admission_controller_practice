@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"encoding/json"
 	"flag"
 	"fmt"
@@ -8,6 +9,7 @@ import (
 	"net/http"
 
 	admissionv1 "k8s.io/api/admission/v1"
+	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -26,19 +28,27 @@ func main() {
 }
 
 func handleValidate(w http.ResponseWriter, r *http.Request) {
-	log.Printf("Received admission review request: %v", r.Body)
-
-	decoder := json.NewDecoder(r.Body)
 	var admissionReview admissionv1.AdmissionReview
-	if err := decoder.Decode(&admissionReview); err != nil {
+
+	bodybuf := new(bytes.Buffer)
+	bodybuf.ReadFrom(r.Body)
+	body := bodybuf.Bytes()
+
+	if err := json.Unmarshal(body, &admissionReview); err != nil {
 		log.Printf("Error decoding admission review request: %v", err)
 		http.Error(w, "Error decoding admission review request", http.StatusBadRequest)
 		return
 	}
 
-	// log.Printf("Received admission review request: %s", admissionReview)
+	// debug log
+	Pod := corev1.Pod{}
+	if err := json.Unmarshal(admissionReview.Request.Object.Raw, &Pod); err != nil {
+		log.Printf("Error decoding pod spec: %v", err)
+		http.Error(w, "Error decoding pod spec", http.StatusBadRequest)
+	}
+	log.Printf("Unmarshal Pod: %v", Pod)
 
-	admissionResponse := handleAdmissionReview(admissionReview)
+	admissionResponse := handleAdmissionReview(&admissionReview)
 
 	responseBody, err := json.Marshal(admissionResponse)
 	if err != nil {
@@ -48,16 +58,18 @@ func handleValidate(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
 	w.Write(responseBody)
 }
 
-func handleAdmissionReview(review admissionv1.AdmissionReview) *admissionv1.AdmissionReview {
+func handleAdmissionReview(review *admissionv1.AdmissionReview) *admissionv1.AdmissionReview {
 	admissionResponse := &admissionv1.AdmissionResponse{
-		UID:     review.Request.UID,
+		UID: review.Request.UID,
+		// allow create
 		Allowed: true,
+		// deny create
+		// Allowed: false,
 		Result: &metav1.Status{
-			Code:    200,
+			Code:    http.StatusOK,
 			Message: "Success",
 		},
 	}
