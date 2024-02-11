@@ -7,15 +7,12 @@ import (
 
 type requestAndResponse map[string]string
 
-func (m requestAndResponse) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	switch r.URL.Path {
-	case "/":
-		fmt.Fprintf(w, "Hello, world!")
-	case "/sample":
-		for k, v := range m {
-			fmt.Fprintf(w, "%s: %s\n", k, v)
-		}
-	}
+func (m requestAndResponse) ServeHTTPIndex(w http.ResponseWriter, r *http.Request) {
+	fmt.Fprintf(w, "%s %s\n", "hello", m["hello"])
+}
+
+func (m requestAndResponse) ServeHTTPSample(w http.ResponseWriter, r *http.Request) {
+	fmt.Fprintf(w, "%s %s\n", "do", m["do"])
 }
 
 func main() {
@@ -23,5 +20,12 @@ func main() {
 		"hello": "world",
 		"do":    "you see me?",
 	}
-	http.ListenAndServe(":8080", requestSample)
+
+	mux := http.NewServeMux()
+
+	uriPrefix := "/api"
+	mux.HandleFunc(uriPrefix+"/hello", requestSample.ServeHTTPIndex)
+	mux.HandleFunc(uriPrefix+"/sample", requestSample.ServeHTTPSample)
+
+	http.ListenAndServe(":8080", mux)
 }
