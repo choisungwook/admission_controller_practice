@@ -18,8 +18,8 @@ func main() {
 	flag.IntVar(&port, "port", 443, "Port to listen on")
 	flag.Parse()
 
-	http.HandleFunc("/validate", handleValidate)
-	http.HandleFunc("/mutate", mutateValidate)
+	http.HandleFunc("/validate", validate)
+	http.HandleFunc("/mutate", mutate)
 	log.Printf("Starting webhook server on port %d", port)
 
 	err := http.ListenAndServeTLS(fmt.Sprintf(":%d", port), "/etc/webhook/certs/tls.crt", "/etc/webhook/certs/tls.key", nil)
@@ -28,7 +28,7 @@ func main() {
 	}
 }
 
-func handleValidate(w http.ResponseWriter, r *http.Request) {
+func validate(w http.ResponseWriter, r *http.Request) {
 	admissionReview, err := decodeAdmissionReview(r)
 	if err != nil {
 		log.Printf("Error decoding admission review request: %v", err)
@@ -49,7 +49,7 @@ func handleValidate(w http.ResponseWriter, r *http.Request) {
 	w.Write(responseBody)
 }
 
-func mutateValidate(w http.ResponseWriter, r *http.Request) {
+func mutate(w http.ResponseWriter, r *http.Request) {
 	admissionReview, err := decodeAdmissionReview(r)
 	if err != nil {
 		log.Printf("Error decoding admission review request: %v", err)
