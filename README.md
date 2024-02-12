@@ -72,7 +72,7 @@ go run main.go
 ## webhook 생성
 
 ```sh
-CA_BUNDLE=$(cat ./manifests/self-sigend-certificates/certs/ca.crt | base64 | tr -d '\n')
+CA_BUNDLE=$(cat ./certs/ca.crt | base64 | tr -d '\n')
 sed -e 's@${CA_BUNDLE}@'"$CA_BUNDLE"'@g' < ./manifests/webhook.yaml | kubectl apply -f -
 ```
 
