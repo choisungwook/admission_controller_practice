@@ -28,27 +28,24 @@ func main() {
 }
 
 func handleValidate(w http.ResponseWriter, r *http.Request) {
-	var admissionReview admissionv1.AdmissionReview
-
-	bodybuf := new(bytes.Buffer)
-	bodybuf.ReadFrom(r.Body)
-	body := bodybuf.Bytes()
-
-	if err := json.Unmarshal(body, &admissionReview); err != nil {
+	admissionReview, err := decodeAdmissionReview(r)
+	if err != nil {
 		log.Printf("Error decoding admission review request: %v", err)
 		http.Error(w, "Error decoding admission review request", http.StatusBadRequest)
 		return
 	}
 
-	// debug log
-	Pod := corev1.Pod{}
-	if err := json.Unmarshal(admissionReview.Request.Object.Raw, &Pod); err != nil {
+	// for debug
+	pod, err := decodePodSpec(admissionReview)
+	if err != nil {
 		log.Printf("Error decoding pod spec: %v", err)
 		http.Error(w, "Error decoding pod spec", http.StatusBadRequest)
+		return
 	}
-	log.Printf("Unmarshal Pod: %v", Pod)
+	log.Printf("Unmarshal Pod: %v", pod)
 
-	admissionResponse := handleAdmissionReview(&admissionReview)
+	// validation handler
+	admissionResponse := validationAdmissionReview(admissionReview)
 
 	responseBody, err := json.Marshal(admissionResponse)
 	if err != nil {
@@ -61,13 +58,35 @@ func handleValidate(w http.ResponseWriter, r *http.Request) {
 	w.Write(responseBody)
 }
 
-func handleAdmissionReview(review *admissionv1.AdmissionReview) *admissionv1.AdmissionReview {
+func decodeAdmissionReview(r *http.Request) (*admissionv1.AdmissionReview, error) {
+	var admissionReview admissionv1.AdmissionReview
+
+	bodybuf := new(bytes.Buffer)
+	bodybuf.ReadFrom(r.Body)
+	body := bodybuf.Bytes()
+
+	err := json.Unmarshal(body, &admissionReview)
+	if err != nil {
+		return nil, err
+	}
+
+	return &admissionReview, nil
+}
+
+func decodePodSpec(admissionReview *admissionv1.AdmissionReview) (*corev1.Pod, error) {
+	pod := corev1.Pod{}
+	err := json.Unmarshal(admissionReview.Request.Object.Raw, &pod)
+	if err != nil {
+		return nil, err
+	}
+
+	return &pod, nil
+}
+
+func validationAdmissionReview(review *admissionv1.AdmissionReview) *admissionv1.AdmissionReview {
 	admissionResponse := &admissionv1.AdmissionResponse{
 		UID: review.Request.UID,
-		// allow create
 		Allowed: true,
-		// deny create
-		// Allowed: false,
 		Result: &metav1.Status{
 			Code:    http.StatusOK,
 			Message: "Success",
