@@ -1,3 +1,15 @@
+<!-- TOC -->
+
+- [개요](#개요)
+- [준비](#준비)
+- [실행 방법](#실행-방법)
+  - [self signed 인증서 생성](#self-signed-인증서-생성)
+  - [admission controller를 실행할 golang pod 생성](#admission-controller를-실행할-golang-pod-생성)
+  - [webhook 생성](#webhook-생성)
+- [admission controller 테스트](#admission-controller-테스트)
+- [참고자료](#참고자료)
+
+<!-- /TOC -->
 # 개요
 kubernetes adminssion controller 연습
 
@@ -15,9 +27,16 @@ make down
 # 실행 방법
 
 ## self signed 인증서 생성
-* [self-signed-certificated 문서 이동](./manifests/self-sigend-certificates/)
 
-# admission controller 생성
+```sh
+mkdir certs
+
+openssl req -x509 -newkey rsa:4096 -nodes -out certs/ca.crt -keyout certs/ca.key -days 365 -config ./cert.cnf -extensions req_ext
+
+kubectl create secret tls webhook-certs --cert=certs/ca.crt --key=certs/ca.key --namespace=default
+```
+
+## admission controller를 실행할 golang pod 생성
 
 * golang 컨테이너가 있는 pod생성
 
@@ -57,9 +76,9 @@ CA_BUNDLE=$(cat ./manifests/self-sigend-certificates/certs/ca.crt | base64 | tr 
 sed -e 's@${CA_BUNDLE}@'"$CA_BUNDLE"'@g' < ./manifests/webhook.yaml | kubectl apply -f -
 ```
 
-# pod 생성 테스트
+# admission controller 테스트
 
-* buysbox 생성 후 pod로그 확인
+* buysbox 생성 후 admission controller pod로그 확인
 
 ```sh
 kubectl apply -f ./manifests/busybox-pod.yaml
