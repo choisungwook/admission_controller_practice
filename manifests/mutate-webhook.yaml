@@ -1,0 +1,25 @@
+apiVersion: admissionregistration.k8s.io/v1
+kind: MutatingWebhookConfiguration
+metadata:
+  name: webhook-mutation
+webhooks:
+- name: pod-mutation.default.com
+  sideEffects: None
+  failurePolicy: Fail
+  admissionReviewVersions:
+  - v1
+  rules:
+  - apiGroups:
+    - ""
+    apiVersions:
+    - v1
+    operations:
+    - CREATE
+    resources:
+    - pods
+  clientConfig:
+    service:
+      name: admission-server
+      namespace: default
+      path: /mutate/
+    caBundle: "${CA_BUNDLE}"
