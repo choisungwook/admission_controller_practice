@@ -29,6 +29,8 @@ func main() {
 }
 
 func validate(w http.ResponseWriter, r *http.Request) {
+	log.Printf("validation handler is called")
+
 	admissionReview, err := decodeAdmissionReview(r)
 	if err != nil {
 		log.Printf("Error decoding admission review request: %v", err)
@@ -112,6 +114,8 @@ func validationAdmissionReview(review *admissionv1.AdmissionReview) *admissionv1
 }
 
 func mutateAdmissionReview(review *admissionv1.AdmissionReview) (*admissionv1.AdmissionReview, error) {
+	log.Printf("mutate handler is called")
+
 	pod := corev1.Pod{}
 	err := json.Unmarshal(review.Request.Object.Raw, &pod)
 	if err != nil {
