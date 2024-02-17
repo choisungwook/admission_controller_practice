@@ -120,58 +120,6 @@ func validationAdmissionReview(review *admissionv1.AdmissionReview) *admissionv1
 	}
 }
 
-// func mutateAdmissionReview(review *admissionv1.AdmissionReview, pod *corev1.Pod) (*admissionv1.AdmissionReview, error) {
-// 	// Add init container to the pod spec
-// 	initContainer := corev1.Container{
-// 		Name:  "nginx-init-container",
-// 		Image: "nginx:latest",
-// 		Ports: []corev1.ContainerPort{
-// 			{
-// 				ContainerPort: 80,
-// 			},
-// 		},
-// 	}
-// 	pod.Spec.InitContainers = append(pod.Spec.InitContainers, initContainer)
-
-// 	fmt.Printf("%v", initContainer)
-// 	fmt.Print("==============")
-// 	fmt.Printf("%v", pod.Spec.InitContainers)
-
-// 	patch := []map[string]interface{}{
-// 		{
-// 			"op":    "add",
-// 			"path":  "/spec/initContainers/-",
-// 			"value": initContainer,
-// 		},
-// 	}
-
-// 	// Marshal the patch into JSON bytes
-// 	patchBytes, err := json.Marshal(patch)
-// 	if err != nil {
-// 		return nil, err
-// 	}
-
-// 	// Create the admission review response with the patch
-// 	admissionResponse := &admissionv1.AdmissionResponse{
-// 		UID:       review.Request.UID,
-// 		Allowed:   true,
-// 		PatchType: func() *admissionv1.PatchType { t := admissionv1.PatchTypeJSONPatch; return &t }(),
-// 		Patch:     patchBytes,
-// 		Result: &metav1.Status{
-// 			Code:    http.StatusOK,
-// 			Message: "Success",
-// 		},
-// 	}
-
-// 	return &admissionv1.AdmissionReview{
-// 		TypeMeta: metav1.TypeMeta{
-// 			Kind:       "AdmissionReview",
-// 			APIVersion: "admission.k8s.io/v1",
-// 		},
-// 		Response: admissionResponse,
-// 	}, nil
-// }
-
 func mutateAdmissionReview(review *admissionv1.AdmissionReview) (*admissionv1.AdmissionReview, error) {
 	pod := corev1.Pod{}
 	err := json.Unmarshal(review.Request.Object.Raw, &pod)
@@ -181,13 +129,13 @@ func mutateAdmissionReview(review *admissionv1.AdmissionReview) (*admissionv1.Ad
 
 	// Add init container to the pod spec
 	initContainer := corev1.Container{
-		Name:  "nginx-init-container",
-		Image: "nginx:latest",
-		Ports: []corev1.ContainerPort{
-			{
-				ContainerPort: 80,
-			},
-		},
+		Name:  "busybox-init-container",
+		Image: "busybox:latest",
+		// Ports: []corev1.ContainerPort{
+		// 	{
+		// 		ContainerPort: 80,
+		// 	},
+		// },
 	}
 	pod.Spec.InitContainers = append(pod.Spec.InitContainers, initContainer)
 
