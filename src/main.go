@@ -141,7 +141,8 @@ func mutateAdmissionReview(review *admissionv1.AdmissionReview) (*admissionv1.Ad
 		},
 	}
 
-	fmt.Printf("%v", patch)
+	// for debug
+	// fmt.Printf("%v", patch)
 
 	// Marshal the patch into JSON bytes
 	patchBytes, err := json.Marshal(&patch)
