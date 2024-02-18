@@ -41,8 +41,8 @@ kubectl create secret tls webhook-certs --cert=certs/ca.crt --key=certs/ca.key -
 * golang 컨테이너가 있는 pod생성
 
 ```sh
-kubecatl apply -f ./manifests/golang-deployment.yaml
-kubecatl apply -f ./manifests/service.yaml
+kubectl apply -f ./manifests/golang-deployment.yaml
+kubectl apply -f ./manifests/service.yaml
 ```
 
 * golang pod 쉘 접속
